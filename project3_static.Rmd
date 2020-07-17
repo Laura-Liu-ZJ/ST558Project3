@@ -13,39 +13,73 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 library(HSAUR3)
 library(DT)
+library(tidyverse)
+
+pottery$region <- pottery$kiln
+levels(pottery$region) <- c(1,2,2,3,3)
 datatable(pottery)
 
-#creating region factor
-
+data <- pottery %>% select(1:9,11)
 ```
 
 # EDA
+
+## contigency table for all elements
 ```{r}
 table(pottery$kiln)
-table(region)
-library(tidyverse)
-apply(X=select(pottery,Al2O3:BaO),2,FUN=function(x){summary(x)})
-plot(select(pottery,Al2O3:BaO), pch=19, col=region) # new scatter plot
+table(data$region)
+```
+
+## statistic summaies for some elements 
+*default: all elements*
+```{r}
+apply(X=data[,1:9],2,FUN=function(x){summary(x)})
+```
+
+## correlation analysis for some elements
+*default: all elements*
+```{r}
 library(GGally)
-ggcorr(select(pottery,Al2O3:BaO),label = T, label_size = 3, label_round = 2)
+ggcorr(data[,1:9],label = T, label_size = 3, label_round = 2)
+```
+
+## scatter plot for some elements
+*default: all elements*
+```{r}
+library(WVPlots) 
+PairPlot(data, 
+         colnames(data)[1:9], 
+         "Title", 
+         group_var = "region",
+         alpha=0.5)
+```
+
+## box plot for one element
+*default: Al2O3*
+```{r}
+ggplot(data = data,aes(x=region,y=Al2O3,color=region))+
+  geom_violin(trim=FALSE,alpha=0.4)+
+  geom_point(alpha=0.5,position = "jitter")
 ```
 
 # PCA
+
+## how to choose PC
 ```{r}
 std.data <- scale(select(pottery,Al2O3:BaO))
 pc.out <- prcomp(std.data)
+pc.out
 summary(pc.out)
 plot(pc.out,type="l")
-# bi-plot
 ```
 
 ```{r}
-library(WVPlots) 
-
-PairPlot(pottery, 
-         colnames(pottery)[1:9], 
-         "Title", 
-         group_var = "kiln")
+library(pca3d)
+pca3d(pc.out,group=data$region)
+# pca3d(pc.out,group=data$region,show.ellipses = T,show.plane = F,,fancy = T)
+snapshotPCA3d(file="second_plot.png")
+pca2d(pc.out,group=data$region,legend = "topleft")
+pca2d(pc.out,group=data$region,biplot = T, biplot.vars = 3)
 ```
 
 
