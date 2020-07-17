@@ -15,10 +15,7 @@ library(HSAUR3)
 library(DT)
 datatable(pottery)
 
-region <- rep(NA,nrow(pottery))
-region[pottery$kiln == 1] = 1
-region[pottery$kiln == 2 | pottery$kiln == 3] = 2
-region[pottery$kiln == 4 | pottery$kiln == 5] = 3
+#creating region factor
 
 ```
 
@@ -28,7 +25,7 @@ table(pottery$kiln)
 table(region)
 library(tidyverse)
 apply(X=select(pottery,Al2O3:BaO),2,FUN=function(x){summary(x)})
-plot(select(pottery,Al2O3:BaO), pch=19, col=region)
+plot(select(pottery,Al2O3:BaO), pch=19, col=region) # new scatter plot
 library(GGally)
 ggcorr(select(pottery,Al2O3:BaO),label = T, label_size = 3, label_round = 2)
 ```
@@ -39,11 +36,23 @@ std.data <- scale(select(pottery,Al2O3:BaO))
 pc.out <- prcomp(std.data)
 summary(pc.out)
 plot(pc.out,type="l")
+# bi-plot
 ```
+
+```{r}
+library(WVPlots) 
+
+PairPlot(pottery, 
+         colnames(pottery)[1:9], 
+         "Title", 
+         group_var = "kiln")
+```
+
 
 # Modelling
 ```{r}
-
+# muti-log + PCA
+# bagging model
 ```
 
 # Conclusion
