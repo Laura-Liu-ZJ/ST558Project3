@@ -10,54 +10,108 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 # description of data
+
+[Attribute Information:](http://archive.ics.uci.edu/ml/datasets/Heart+failure+clinical+records)
+
+Thirteen (13) clinical features:
+
+- age: age of the patient (years)
+- anaemia: decrease of red blood cells or hemoglobin (boolean)
+- high blood pressure: if the patient has hypertension (boolean)
+- creatinine phosphokinase (CPK): level of the CPK enzyme in the blood (mcg/L)
+- diabetes: if the patient has diabetes (boolean)
+- ejection fraction: percentage of blood leaving the heart at each contraction (percentage)
+- platelets: platelets in the blood (kiloplatelets/mL)
+- sex: woman or man (binary)
+- serum creatinine: level of serum creatinine in the blood (mg/dL)
+- serum sodium: level of serum sodium in the blood (mEq/L)
+- smoking: if the patient smokes or not (boolean)
+- time: follow-up period (days)
+- [target] death event: if the patient deceased during the follow-up period (boolean)
+
 ```{r}
-library(HSAUR3)
 library(DT)
 library(tidyverse)
+library(readr)
 
-pottery$region <- pottery$kiln
-levels(pottery$region) <- c(1,2,2,3,3)
-datatable(pottery)
-
-data <- pottery %>% select(1:9,11)
+data <- read_csv("heart_failure_clinical_records_dataset.csv") %>%
+  rename( "CPK"=creatinine_phosphokinase,
+          "EF" = ejection_fraction,
+          "HT" = high_blood_pressure,
+          "creatinine" = serum_creatinine,
+          "sodium" = serum_sodium,
+          "death" = DEATH_EVENT)
+datatable(data)
 ```
 
 # EDA
 
-## contigency table for all elements
+## contigency table for select categorical variables
 ```{r}
-table(pottery$kiln)
-table(data$region)
+table(data$anaemia,data$death)
+table(data$diabetes,data$death)
+table(data$HT,data$death)
+table(data$sex,data$death)
+table(data$smoking,data$death)
 ```
 
-## statistic summaies for some elements 
-*default: all elements*
+## statistic summaies for some numeric variabel 
+*default: all numeric elements*
 ```{r}
-apply(X=data[,1:9],2,FUN=function(x){summary(x)})
+apply(X=data[,c(1,3,5,7,8,9,12)],2,FUN=function(x){summary(x)})
 ```
 
 ## correlation analysis for some elements
-*default: all elements*
+*default: all elements expect response*
 ```{r}
+library(ggplot2)
 library(GGally)
-ggcorr(data[,1:9],label = T, label_size = 3, label_round = 2)
+ggcorr(data,label = T, label_size = 3, angle= -30, label_round = 2,size=3)+ ggplot2::labs(title = "Correlation Analysis")
 ```
 
-## scatter plot for some elements
-*default: all elements*
+## scatter plot for some numeric elements
+*default: all numeric elements*
 ```{r}
+data$death_event <- as.factor(data$death)
 library(WVPlots) 
 PairPlot(data, 
-         colnames(data)[1:9], 
-         "Title", 
-         group_var = "region",
+         colnames(data)[c(1,3,5,7,8,9,12)], 
+         title="Title", 
+         group_var = "death_event",
          alpha=0.5)
+library(GGally)
+ggpairs(data[,c(1,3,5,7,8,9,12,14)],aes(colour = death_event,alpha=-.4),
+        upper="blank")
 ```
 
 ## box plot for one element
 *default: Al2O3*
 ```{r}
-ggplot(data = data,aes(x=region,y=Al2O3,color=region))+
+ggplot(data = data,aes(x=death_event,y=age,color=death_event))+
+  geom_violin(trim=FALSE,alpha=0.4)+
+  geom_point(alpha=0.5,position = "jitter")
+
+ggplot(data = data,aes(x=death_event,y=CPK,color=death_event))+
+  geom_violin(trim=FALSE,alpha=0.4)+
+  geom_point(alpha=0.5,position = "jitter")
+
+ggplot(data = data,aes(x=death_event,y=EF,color=death_event))+
+  geom_violin(trim=FALSE,alpha=0.4)+
+  geom_point(alpha=0.5,position = "jitter")
+
+ggplot(data = data,aes(x=death_event,y=platelets ,color=death_event))+
+  geom_violin(trim=FALSE,alpha=0.4)+
+  geom_point(alpha=0.5,position = "jitter")
+
+ggplot(data = data,aes(x=death_event,y=creatinine ,color=death_event))+
+  geom_violin(trim=FALSE,alpha=0.4)+
+  geom_point(alpha=0.5,position = "jitter")
+
+ggplot(data = data,aes(x=death_event,y=sodium,color=death_event))+
+  geom_violin(trim=FALSE,alpha=0.4)+
+  geom_point(alpha=0.5,position = "jitter")
+
+ggplot(data = data,aes(x=death_event,y=time,color=death_event))+
   geom_violin(trim=FALSE,alpha=0.4)+
   geom_point(alpha=0.5,position = "jitter")
 ```
@@ -66,7 +120,7 @@ ggplot(data = data,aes(x=region,y=Al2O3,color=region))+
 
 ## how to choose PC
 ```{r}
-std.data <- scale(select(pottery,Al2O3:BaO))
+std.data <- scale(select(data,))##?
 pc.out <- prcomp(std.data)
 pc.out
 summary(pc.out)
