@@ -1,16 +1,19 @@
-#
-# This is the user-interface definition of a Shiny web application. You can
-# run the application by clicking 'Run App' above.
-#
-# Find out more about building applications with Shiny here:
-#
-#    http://shiny.rstudio.com/
-#
+####################################################
+# Purpose: ui for St558 project3 app               #
+# Author: Zhijun Liu                               #
+# Date: 2020-07-24                                 #
+####################################################
 
 library(shiny)
+library(shinythemes)
+library(dashboard)
+
 
 # Define UI for application that draws a histogram
 shinyUI(fluidPage(
+    
+    # Application theme
+    theme = shinytheme("sandstone"),
 
     # Application title
     titlePanel("Old Faithful Geyser Data"),

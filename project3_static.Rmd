@@ -21,7 +21,13 @@ library(tree)
 
 ## description of data
 
-[Attribute Information:](http://archive.ics.uci.edu/ml/datasets/Heart+failure+clinical+records)
+### [Backgroud](https://bmcmedinformdecismak.biomedcentral.com/articles/10.1186/s12911-020-1023-5)
+
+Cardiovascular diseases kill approximately 17 million people globally every year, and they mainly exhibit as myocardial infarctions and heart failures. Heart failure (HF) occurs when the heart cannot pump enough blood to meet the needs of the body.Available electronic medical records of patients quantify symptoms, body features, and clinical laboratory test values, which can be used to perform biostatistics analysis aimed at highlighting patterns and correlations otherwise undetectable by medical doctors. Machine learning, in particular, can predict patients’ survival from their data and can individuate the most important features among those included in their medical records.
+
+### Data set
+
+The original dataset version was collected by Tanvir Ahmad, Assia Munir, Sajjad Haider Bhatti, Muhammad Aftab, and Muhammad Ali Raza (Government College University, Faisalabad, Pakistan) and made available by them on FigShare under the Attribution 4.0 International (CC BY 4.0: freedom to share and adapt the material) copyright in July 2017.
 
 Thirteen (13) clinical features:
 
@@ -39,8 +45,11 @@ Thirteen (13) clinical features:
 - time: follow-up period (days)
 - [target] death event: if the patient deceased during the follow-up period (boolean)
 
+[Attribute Information:](http://archive.ics.uci.edu/ml/datasets/Heart+failure+clinical+records)
+
 ## description of app
 
+This app 
 
 # 5. Data
 ```{r}
@@ -170,7 +179,6 @@ pca3d(pc.out,components = c(1,2,3),group=data$survive, legend="right")
 pca2d(pc.out,components = c(1,2),group=data$survive,biplot = T, biplot.vars = 7, legend="right")
 ```
 
-
 # 4. Modelling
 
 ## Tree model 
@@ -204,6 +212,13 @@ plot(pruneFit$size,pruneFit$dev,type="b")
 pruneFitFinal <- prune.misclass(treeFit,best=8) # choose the tree size in best option
 # user predict to change the variable value (need to split the categorical data and numeric data)
 # predict(pruneFitFinal, newdata = data.frame(time=10, creatinine=2),type="class")
+```
+### new tree
+```{r}
+library(rpart)
+tree <- rpart(survive ~ EF + creatinine,data=factorData,method="class",control = rpart.control(cp=0.05))
+library(rattle)
+fancyRpartPlot(tree,sub="",main="")
 ```
 
 ## Logistic Regression
