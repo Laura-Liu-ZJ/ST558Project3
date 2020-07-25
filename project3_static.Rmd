@@ -7,9 +7,14 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(DT)
+library(tidyverse)
+library(readr)
 ```
 
-# description of data
+# 1. Info
+
+## description of data
 
 [Attribute Information:](http://archive.ics.uci.edu/ml/datasets/Heart+failure+clinical+records)
 
@@ -29,122 +34,194 @@ Thirteen (13) clinical features:
 - time: follow-up period (days)
 - [target] death event: if the patient deceased during the follow-up period (boolean)
 
-```{r}
-library(DT)
-library(tidyverse)
-library(readr)
+## description of app
 
+
+# 5. Data
+```{r}
+# read in data
 data <- read_csv("heart_failure_clinical_records_dataset.csv") %>%
   rename( "CPK"=creatinine_phosphokinase,
           "EF" = ejection_fraction,
           "HT" = high_blood_pressure,
           "creatinine" = serum_creatinine,
           "sodium" = serum_sodium,
-          "death" = DEATH_EVENT)
+          "death" = DEATH_EVENT) %>%
+  mutate(survive = 1-death) %>% select (-"death")
+
+
+factorData <- data
+
+factorData$anaemia <- as.factor(factorData$anaemia)
+factorData$diabetes <- as.factor(factorData$diabetes)
+factorData$HT <- as.factor(factorData$HT)
+factorData$sex <- as.factor(factorData$sex)
+factorData$smoking <- as.factor(factorData$smoking)
+factorData$survive <- as.factor(factorData$survive)
+
 datatable(data)
 ```
 
-# EDA
-
-## contigency table for select categorical variables
+# 2. EDA
+## categorical
+### contigency table for select categorical variables
 ```{r}
-table(data$anaemia,data$death)
-table(data$diabetes,data$death)
-table(data$HT,data$death)
-table(data$sex,data$death)
-table(data$smoking,data$death)
+table(data$anaemia,data$survive)
+table(data$diabetes,data$survive)
+table(data$HT,data$survive)
+table(data$sex,data$survive)
+table(data$smoking,data$survive)
 ```
 
-## statistic summaies for some numeric variabel 
+### barchat
+```{r}
+# barchat for each 
+ggplot(data = factorData) + 
+  geom_bar(aes(x=anaemia,fill=survive),alpha=0.8) +
+  scale_fill_brewer(palette="Set1")+
+  labs(title='title')+ 
+  theme_minimal()
+```
+
+## numeric
+### statistic summaies for some numeric variable 
 *default: all numeric elements*
 ```{r}
-apply(X=data[,c(1,3,5,7,8,9,12)],2,FUN=function(x){summary(x)})
+data_numeric_summary <- data %>% select(age,CPK,EF,platelets,creatinine,sodium,time)
+
+apply(X=data_numeric_summary,2,FUN=function(x){summary(x)})
 ```
 
-## correlation analysis for some elements
+### correlation analysis for some elements
 *default: all elements expect response*
 ```{r}
 library(ggplot2)
 library(GGally)
-ggcorr(data,label = T, label_size = 3, angle= -30, label_round = 2,size=3)+ ggplot2::labs(title = "Correlation Analysis")
+ggcorr(factorData,label = T, label_size = 3, angle= -30, label_round = 2,size=3)+
+  ggplot2::labs(title = "Correlation Analysis")
 ```
 
-## scatter plot for some numeric elements
+### scatter plot for some numeric elements
 *default: all numeric elements*
 ```{r}
-data$death_event <- as.factor(data$death)
+data_numeric_scatter <- factorData %>% select(age,CPK,EF,platelets,creatinine,sodium,time,survive)
+
 library(WVPlots) 
-PairPlot(data, 
-         colnames(data)[c(1,3,5,7,8,9,12)], 
+PairPlot(data_numeric_scatter, 
+         colnames(data_numeric_scatter)[1:7], 
          title="Title", 
-         group_var = "death_event",
-         alpha=0.5)
-library(GGally)
-ggpairs(data[,c(1,3,5,7,8,9,12,14)],aes(colour = death_event,alpha=-.4),
-        upper="blank")
+         group_var = "survive",
+         alpha=0.5，
+         palette="Set1")
 ```
 
-## box plot for one element
-*default: Al2O3*
+### box plot for numeric element
+*default: age*
 ```{r}
-ggplot(data = data,aes(x=death_event,y=age,color=death_event))+
+data_numeric_box <- data_numeric_scatter
+ggplot(data = data_numeric_box,aes(x=survive,y=age,color=survive))+
   geom_violin(trim=FALSE,alpha=0.4)+
-  geom_point(alpha=0.5,position = "jitter")
+  geom_point(alpha=0.5,position = "jitter")+
+  scale_colour_brewer(palette="Set1")
 
-ggplot(data = data,aes(x=death_event,y=CPK,color=death_event))+
-  geom_violin(trim=FALSE,alpha=0.4)+
-  geom_point(alpha=0.5,position = "jitter")
+# CPK
+# EF
+# platelets
+# creatinine
+# sodium
+# time
 
-ggplot(data = data,aes(x=death_event,y=EF,color=death_event))+
-  geom_violin(trim=FALSE,alpha=0.4)+
-  geom_point(alpha=0.5,position = "jitter")
-
-ggplot(data = data,aes(x=death_event,y=platelets ,color=death_event))+
-  geom_violin(trim=FALSE,alpha=0.4)+
-  geom_point(alpha=0.5,position = "jitter")
-
-ggplot(data = data,aes(x=death_event,y=creatinine ,color=death_event))+
-  geom_violin(trim=FALSE,alpha=0.4)+
-  geom_point(alpha=0.5,position = "jitter")
-
-ggplot(data = data,aes(x=death_event,y=sodium,color=death_event))+
-  geom_violin(trim=FALSE,alpha=0.4)+
-  geom_point(alpha=0.5,position = "jitter")
-
-ggplot(data = data,aes(x=death_event,y=time,color=death_event))+
-  geom_violin(trim=FALSE,alpha=0.4)+
-  geom_point(alpha=0.5,position = "jitter")
 ```
 
-# PCA
+# 3. PCA
 
-## how to choose PC
+## Introduction
+Principal components analysis (PCA) is a dimension reduction technique that is widely used in multivariate statistics. The objective is to condense the information that is present in the original set of variables via linear combinations of the variables while losing as little information as possible. 
+
+Typically, the number of linear transformations is much smaller than the number of original variables; hence the reduction in the dimensionality of the data. This can be useful in different ways, such as providing better visualization and computational advantages. PCA also decorrelates the data, that is, PCA produces linear combinations of the variables that are mutually uncorrelated.
+
+Goal: Obtain a linear combination of the variables that accounts for the largest amount of variability (assume 0 mean for each predictor).
+
+$$ z_{i1} = \phi_{11}x_{i1}+ \phi_{21}x_{i2}+...+ \phi_{p1}x_{ip}$$
+Constraint: 
+
+- $\Sigma^p_{j=1}\phi^2_{j1}=1$.
+
+- $\mathop{max}\limits_{\phi's}\frac{1}{n}\Sigma^n_{i=1}z^2_{i1}$.
+
+- PCs must be mutually exclusive.
+
+## analysis
 ```{r}
-std.data <- scale(select(data,))##?
-pc.out <- prcomp(std.data)
-pc.out
+data_numeric_pc <- data_numeric_summary
+pc.out <- prcomp(data_numeric_pc,scale = T)
+# referrence
 summary(pc.out)
-plot(pc.out,type="l")
-```
-
-```{r}
+screeplot(pc.out,type="lines",col="#990000",lwd=2)
+# rotation
+round(pc.out$rotation[,1:3],3)
 library(pca3d)
-pca3d(pc.out,group=data$region)
-# pca3d(pc.out,group=data$region,show.ellipses = T,show.plane = F,,fancy = T)
-snapshotPCA3d(file="second_plot.png")
-pca2d(pc.out,group=data$region,legend = "topleft")
-pca2d(pc.out,group=data$region,biplot = T, biplot.vars = 3)
+pca3d(pc.out,components = c(1,2,3),group=data$survive, legend="right")
+# snapshotPCA3d(file="second_plot.png")
+pca2d(pc.out,components = c(1,2),group=data$survive,biplot = T, biplot.vars = 7, legend="right")
 ```
 
 
-# Modelling
+# 4. Modelling
+
+## Tree model 
+
+### Introduction
+Classification tree if goal is to classify (predict) group membership.
+
+For a binary response, within a given node (p=P(correct classification))
+
+$$ Deviance: -2plog(p)-2(1-p)log(1-p)$$
+
+For all possible splits, minimize this (weighted appropriately for node size).
+
+We need to pruned back using classification error rate to prevent overfit, which might increase bias but decrease variance, hopefully improving prediction.
+
+### Analysis
 ```{r}
-# muti-log + PCA
-# bagging model
+library(tree)
+# fit the tree model
+treeFit <- tree(survive ~ . ,data=factorData,split="deviance")
+# result of tree model
+summary(treeFit)
+# dendrogram
+plot(treeFit)
+text(treeFit, pretty = 0, cex = 0.6)
+# giveing the referrence result for choosing tree size
+pruneFit <- cv.tree(treeFit, FUN = prune.misclass)
+pruneFit
+# giveing the referrence plot for choosing tree size
+plot(pruneFit$size,pruneFit$dev,type="b")
+pruneFitFinal <- prune.misclass(treeFit,best=8) # choose the tree size in best option
+# user predict to change the variable value (need to split the categorical data and numeric data)
+# predict(pruneFitFinal, newdata = data.frame(time=10, creatinine=2),type="class")
 ```
 
-# Conclusion
-```{r}
+## Logistic Regression
+*default variable: time + creatinine*
 
+### Introduction
+
+Logistic regression is a statistical model that in its basic form uses a logistic function to model a binary dependent variable. 
+
+Basic Logistic Regression models survive probability using logistic function, where $\boldsymbol{\beta} = (\beta_1,...\beta_p)^T,\boldsymbol{x}=(x_1,...x_p)^T$
+
+$$P(survive=1|\boldsymbol{x})=\frac{e^{\alpha+\boldsymbol{\beta}^T\boldsymbol{x}}}{1+e^{\alpha+\boldsymbol{\beta}^T\boldsymbol{x}}}$$
+
+$$log\left[\frac{P(survive=1|\boldsymbol{x})}{P(survive=0|\boldsymbol{x})}\right]=\alpha+\boldsymbol{\beta}^T\boldsymbol{x}$$
+
+### Analysis
+
+```{r}
+glmFit <- glm(survive ~ ., data=factorData,family = "binomial")
+glmFit
+summary(glmFit)
+# predict
+# exp(predict(glmFit, newdata = data.frame(time=10, creatinine=2),type="link"))
 ```
 
