@@ -10,6 +10,11 @@ knitr::opts_chunk$set(echo = TRUE)
 library(DT)
 library(tidyverse)
 library(readr)
+library(ggplot2)
+library(GGally)
+library(WVPlots)
+library(pca3d)
+library(tree)
 ```
 
 # 1. Info
@@ -95,8 +100,7 @@ apply(X=data_numeric_summary,2,FUN=function(x){summary(x)})
 ### correlation analysis for some elements
 *default: all elements expect response*
 ```{r}
-library(ggplot2)
-library(GGally)
+
 ggcorr(factorData,label = T, label_size = 3, angle= -30, label_round = 2,size=3)+
   ggplot2::labs(title = "Correlation Analysis")
 ```
@@ -106,7 +110,7 @@ ggcorr(factorData,label = T, label_size = 3, angle= -30, label_round = 2,size=3)
 ```{r}
 data_numeric_scatter <- factorData %>% select(age,CPK,EF,platelets,creatinine,sodium,time,survive)
 
-library(WVPlots) 
+
 PairPlot(data_numeric_scatter, 
          colnames(data_numeric_scatter)[1:7], 
          title="Title", 
@@ -160,7 +164,7 @@ summary(pc.out)
 screeplot(pc.out,type="lines",col="#990000",lwd=2)
 # rotation
 round(pc.out$rotation[,1:3],3)
-library(pca3d)
+
 pca3d(pc.out,components = c(1,2,3),group=data$survive, legend="right")
 # snapshotPCA3d(file="second_plot.png")
 pca2d(pc.out,components = c(1,2),group=data$survive,biplot = T, biplot.vars = 7, legend="right")
@@ -184,7 +188,7 @@ We need to pruned back using classification error rate to prevent overfit, which
 
 ### Analysis
 ```{r}
-library(tree)
+
 # fit the tree model
 treeFit <- tree(survive ~ . ,data=factorData,split="deviance")
 # result of tree model
