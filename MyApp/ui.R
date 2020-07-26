@@ -4,33 +4,33 @@
 # Date: 2020-07-24                                 #
 ####################################################
 
+# prepare the packages
 library(shiny)
+library(shinydashboard)
+library(dashboardthemes)
+library(DT)
+library(ggplot2)
+library(GGally)
+library(tidyverse)
 library(shinythemes)
-library(dashboard)
+library(plotly)
+library(rgl)
+library(pca3d)
+library(tree)
 
 
-# Define UI for application that draws a histogram
-shinyUI(fluidPage(
-    
-    # Application theme
-    theme = shinytheme("sandstone"),
+####################################
+#              Shiny UI            #
+####################################
 
-    # Application title
-    titlePanel("Old Faithful Geyser Data"),
-
-    # Sidebar with a slider input for number of bins
-    sidebarLayout(
-        sidebarPanel(
-            sliderInput("bins",
-                        "Number of bins:",
-                        min = 1,
-                        max = 50,
-                        value = 30)
-        ),
-
-        # Show a plot of the generated distribution
-        mainPanel(
-            plotOutput("distPlot")
-        )
-    )
-))
+dashboardPage(skin = "red",
+              dashboardHeader(title = "Heart Failure Clinical Records"),
+              dashboardSidebar(uiOutput("ui_sidebar")),
+              dashboardBody(
+                  shinyDashboardThemes(
+                      theme = "flat_red"
+                  ),
+                  uiOutput("ui_body")
+              ),
+              withMathJax()
+)
