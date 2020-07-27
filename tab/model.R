@@ -1,3 +1,9 @@
+####################################################
+# Purpose: modeling page                           #
+# Author: Zhijun Liu                               #
+# Date: 2020-07-24                                 #
+####################################################
+
 c_list <- list("anaemia","diabetes","HT","sex","smoking")
 n_list <- list("age","CPK","EF","platelets","creatinine","sodium","time")
 

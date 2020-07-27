@@ -1,3 +1,9 @@
+####################################################
+# Purpose: EDA page                                #
+# Author: Zhijun Liu                               #
+# Date: 2020-07-24                                 #
+####################################################
+
 # categorical variable list
 c_list <- list("anaemia","diabetes","HT","sex","smoking")
 
@@ -51,6 +57,11 @@ tabItem_eda <-
                      ),
                      
                      mainPanel(
+                       
+                       h4("Scatter Plot for All Variables"), # Scatter
+                       plotlyOutput("eda_n_sc"),  # Scatter
+                       br(),
+                       hr(),
                        h4("Statistic Summaies for Selected Variables"), # Summary table (title)
                        tableOutput("eda_n_tb"), # Summary table
                        br(),
@@ -64,9 +75,6 @@ tabItem_eda <-
                               ),
                        br(),
                        
-                       h4("Scatter Plot for All Variables"), # Scatter
-                       plotlyOutput("eda_n_sc"),  # Scatter
-                       br(),
                        
                        hr(),
                        selectInput("eda_n_bvar",
@@ -75,12 +83,7 @@ tabItem_eda <-
                                    selected = n_list[1]
                        ),
                        h4(textOutput("eda_n_box_title")), # Box
-                       plotOutput("eda_n_box"),  # Box
-                       column(12,
-                              align = "right",
-                              downloadButton("eda_n_save_box",
-                                             "Save Plot")
-                       )
+                       plotlyOutput("eda_n_box")  # Box
                      )
                      
             ) # End of Numerical Variables
@@ -276,19 +279,24 @@ output$eda_n_box_title <-
 
 box_plt <- reactive({
   
-  ggplot(data = factorData,aes(x=survive,y=eval(as.name(input$eda_n_bvar)),color=survive))+
+  boxplot  <- ggplot(data = factorData,aes(x=survive,y=eval(as.name(input$eda_n_bvar)),color=survive))+
     geom_violin(trim=FALSE,alpha=0.4)+
     geom_point(alpha=0.5,position = "jitter")+
     scale_colour_brewer(palette="Set1")+
-    labs(y=input$eda_n_bvar)+ 
+    labs(y=input$eda_n_bvar)+
     theme_minimal()
+  
+  ggplotly(boxplot)
   
 })
 
 output$eda_n_box <- 
-  renderPlot(
+  renderPlotly(
     box_plt()
   )
+
+
+
 
 
 #############################
@@ -313,12 +321,3 @@ output$eda_n_save_cor <-
     }
   )
 
-
-# save boxplot
-output$eda_n_save_box <-
-  downloadHandler(
-    filename = function(){paste0("Boxplot for ", input$eda_n_bvar, ".png")},
-    content = function(file){
-      ggsave(file,box_plt())
-    }
-  )

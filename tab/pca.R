@@ -1,3 +1,9 @@
+####################################################
+# Purpose: PCA page                                #
+# Author: Zhijun Liu                               #
+# Date: 2020-07-24                                 #
+####################################################
+
 # numerical variable list
 n_list <- list("age","CPK","EF","platelets","creatinine","sodium","time")
 

@@ -263,12 +263,13 @@ fig
 data_numeric_box <- factorData %>% select(age,CPK,EF,platelets,creatinine,sodium,time,survive)
 
 # boxplot for age
-ggplot(data = data_numeric_box,aes(x=survive,y=age,color=survive))+
+boxplot  <- ggplot(data = data_numeric_box,aes(x=survive,y=age,color=survive))+
   geom_violin(trim=FALSE,alpha=0.4)+
   geom_point(alpha=0.5,position = "jitter")+
   scale_colour_brewer(palette="Set1")+
-  labs(title="title")+ 
   theme_minimal()
+
+ggplotly(boxplot)
 
 # boxplot for CPK
 ggplot(data = data_numeric_box,aes(x=survive,y=CPK,color=survive))+
@@ -305,6 +306,26 @@ ggplot(data = data_numeric_box,aes(x=survive,y=time,color=survive))+
   geom_violin(trim=FALSE,alpha=0.4)+
   geom_point(alpha=0.5,position = "jitter")+
   scale_colour_brewer(palette="Set1")
+
+```
+
+```{r}
+  
+# prepare data for scatter plot of each numeric variable vs response
+distSum <- data %>% group_by(time) %>% summarise(propSurvive = mean(survive), n= n())
+
+# plot the scatter plot by ggplot
+scatterplot <- ggplot(distSum,aes(x=time,y=propSurvive)) + 
+  geom_point(stat = "identity",aes(size=n, alpha=propSurvive))+
+  stat_smooth(data=data,
+              aes(x=time,y=survive),
+              method="glm",
+              method.args = list(family="binomial")
+              )+
+  theme_minimal()
+
+# tranform into plotly plot
+ggplotly(scatterplot)
 
 ```
 
