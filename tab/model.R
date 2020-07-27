@@ -335,7 +335,7 @@ output$tree_ref_tb <-
   renderTable({
     if (req(input$tree_submit_1)>0) { 
       isolate({
-        data_factor_tree <- factorData %>% select(input$tree_nvar,input$tree_cvar,survive)
+        data_factor_tree <<- factorData %>% select(input$tree_nvar,input$tree_cvar,survive)
         treeFit <- tree(survive ~ . ,data=data_factor_tree,split="deviance")
         # giving the referrence result for choosing tree size
         pruneFit <- cv.tree(treeFit, FUN = prune.misclass)
@@ -345,7 +345,7 @@ output$tree_ref_tb <-
   })
 
 plot_tree <- reactive({
-  data_factor_tree <- factorData %>% select(input$tree_nvar,input$tree_cvar,survive)
+  data_factor_tree <<- factorData %>% select(input$tree_nvar,input$tree_cvar,survive)
   treeFit <- tree(survive ~ . ,data=data_factor_tree,split="deviance")
   pruneFit <- cv.tree(treeFit, FUN = prune.misclass)
   # referrence plot for choosing tree size
@@ -357,7 +357,7 @@ plot_tree <- reactive({
 output$tree_ref_plt <-
   renderPlot({
     isolate({
-      data_factor_tree <- factorData %>% select(input$tree_nvar,input$tree_cvar,survive)
+      data_factor_tree <<- factorData %>% select(input$tree_nvar,input$tree_cvar,survive)
       treeFit <- tree(survive ~ . ,data=data_factor_tree,split="deviance")
       pruneFit <- cv.tree(treeFit, FUN = prune.misclass)
     })
