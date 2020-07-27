@@ -5,8 +5,8 @@ account: zhijun-liu
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 2615321
-bundleId: 3442997
+bundleId: 3443177
 url: https://zhijun-liu.shinyapps.io/st558project3/
-when: 1595884917.94592
+when: 1595887400.74456
 asMultiple: FALSE
 asStatic: FALSE
