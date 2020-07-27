@@ -6,7 +6,7 @@ The dataset is `heart_failure_clinical_records_dataset.csv`, you can also get it
 
 The original static file is `project3_static.Rmd`. I transformed this static file into an interactive application by building the app frame by `ui.R` as well as`server.R` and filling it by `info` and `tab` folders. The `info` folder includes all the introductions with `.md` files and the `tab` folder includes all the codes for each page with `.R` files.
 
-If you want to look at and try this app, you can click this [link](https://zhijun-liu.shinyapps.io/st558project3/).
+If you want to look at and try to use this app, you can click this [link](https://zhijun-liu.shinyapps.io/st558project3/).
 
 ### Packages
 
