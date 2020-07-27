@@ -7,47 +7,447 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-```
-
-# description of data
-```{r}
-library(HSAUR3)
 library(DT)
-datatable(pottery)
-
-region <- rep(NA,nrow(pottery))
-region[pottery$kiln == 1] = 1
-region[pottery$kiln == 2 | pottery$kiln == 3] = 2
-region[pottery$kiln == 4 | pottery$kiln == 5] = 3
-
-```
-
-# EDA
-```{r}
-table(pottery$kiln)
-table(region)
 library(tidyverse)
-apply(X=select(pottery,Al2O3:BaO),2,FUN=function(x){summary(x)})
-plot(select(pottery,Al2O3:BaO), pch=19, col=region)
+library(readr)
+library(ggplot2)
 library(GGally)
-ggcorr(select(pottery,Al2O3:BaO),label = T, label_size = 3, label_round = 2)
+library(plotly)
+library(pca3d)
+library(tree)
 ```
+
+# 1. Info
+
+## description of data
+
+### Data set
+
+The original dataset version was collected by Tanvir Ahmad, Assia Munir, Sajjad Haider Bhatti, Muhammad Aftab, and Muhammad Ali Raza (Government College University, Faisalabad, Pakistan) and made available by them on FigShare under the Attribution 4.0 International (CC BY 4.0: freedom to share and adapt the material) copyright in July 2017.
+
+Thirteen (13) clinical features:
+
+- age: age of the patient (years)
+- anaemia: decrease of red blood cells or hemoglobin (boolean)
+- high blood pressure: if the patient has hypertension (boolean)
+- creatinine phosphokinase (CPK): level of the CPK enzyme in the blood (mcg/L)
+- diabetes: if the patient has diabetes (boolean)
+- ejection fraction: percentage of blood leaving the heart at each contraction (percentage)
+- platelets: platelets in the blood (kiloplatelets/mL)
+- sex: woman or man (binary)
+- serum creatinine: level of serum creatinine in the blood (mg/dL)
+- serum sodium: level of serum sodium in the blood (mEq/L)
+- smoking: if the patient smokes or not (boolean)
+- time: follow-up period (days)
+- [target] death event: if the patient deceased during the follow-up period (boolean)
+
+[Attribute Information:](http://archive.ics.uci.edu/ml/datasets/Heart+failure+clinical+records)
+
+```{r}
+# picture of heart
+library(knitr)
+include_graphics("heart.jpg")
+```
+
+## description of app
+
+### [Backgroud](https://www.cdc.gov/heartdisease/heart_failure.htm)
+
+#### Heart Failure
+Heart failure happens when the heart cannot pump enough blood and oxygen to support other organs in your body. Heart failure is a serious condition, but it does not mean that the heart has stopped beating.
+
+#### Facts About Heart Failure in the United States
+- About 6.5 million adults in the United States have heart failure.
+- Heart failure was a contributing cause of 1 in 8 deaths in 2017.
+- Heart failure costs the nation an estimated $30.7 billion in 2012 This total includes the cost of health care services, medicines to treat heart failure, and missed days of work.
+
+#### Deaths from Heart Failure Vary by Geography
+Heart failure is more common in some areas of the United States than in others. Below is a map showing the rate of death from heart failure by county during 2014–2016.
+
+```{r}
+# picture of heart failure death rates in US
+include_graphics("heatmap.jpg")
+```
+
+Available electronic medical records of patients quantify symptoms, body features, and clinical laboratory test values, which can be used to perform biostatistics analysis aimed at highlighting patterns and correlations otherwise undetectable by medical doctors. Machine learning, in particular, can predict patients’ survival from their data and can individuate the most important features among those included in their medical records.
+
+There are four pages in this application to carry out this machine learning process except for this information page. 
+
+- Exploring Data Analysis: Exploring Analysis on the numeric predictors and the categorical predictors.
+- Principal Components Analysis: One of unsupervised learning on the numeric predictors.
+- Modeling: Two ways of supervised learning (tree model and logistic regression).
+- Data: Looking up and download data.
+
+
+```{r}
+# read in raw data
+data <- read_csv("heart_failure_clinical_records_dataset.csv") %>%
+  # change the variable names
+  rename( "CPK"=creatinine_phosphokinase,
+          "EF" = ejection_fraction,
+          "HT" = high_blood_pressure,
+          "creatinine" = serum_creatinine,
+          "sodium" = serum_sodium,
+          "death" = DEATH_EVENT) %>%
+  # create a new variable called survive
+  mutate(survive = 1-death) %>% select (-"death")
+
+# create a new data set which is similar with data
+factorData <- data
+# change the boolean variable into categorical data
+factorData$anaemia <- as.factor(factorData$anaemia)
+factorData$diabetes <- as.factor(factorData$diabetes)
+factorData$HT <- as.factor(factorData$HT)
+factorData$sex <- as.factor(factorData$sex)
+factorData$smoking <- as.factor(factorData$smoking)
+factorData$survive <- as.factor(factorData$survive)
+```
+
+# 2. EDA
+## categorical
+### contingency table for select categorical variables
+*default:anaemia*
+```{r}
+## All possible
+# contingency table for anaemia and survive
+table(data$anaemia,data$survive,dnn = list("a","s"))
+table(data$survive)
+# contingency table for diabetes and survive
+table(data$diabetes,data$survive)
+# contingency table for HT and survive
+table(data$HT,data$survive)
+# contingency table for sex and survive
+table(data$sex,data$survive)
+# contingency table for smoking and survive
+table(data$smoking,data$survive)
+```
+
+### barchat for select categorical variables
+```{r}
+# barchat for each categorical data
+ggplot(data = factorData) + 
+  geom_bar(aes(x=anaemia,fill=survive),alpha=0.8) +
+  scale_fill_brewer(palette="Set1")+
+  labs(title='title')+ 
+  theme_minimal()
+
+ggplot(data = factorData) + 
+  geom_bar(aes(x=diabetes,fill=survive),alpha=0.8) +
+  scale_fill_brewer(palette="Set1")+
+  labs(title='title')+ 
+  theme_minimal()
+
+ggplot(data = factorData) + 
+  geom_bar(aes(x=HT,fill=survive),alpha=0.8) +
+  scale_fill_brewer(palette="Set1")+
+  labs(title='title')+ 
+  theme_minimal()
+
+ggplot(data = factorData) + 
+  geom_bar(aes(x=sex,fill=survive),alpha=0.8) +
+  scale_fill_brewer(palette="Set1")+
+  labs(title='title')+ 
+  theme_minimal()
+
+ggplot(data = factorData) + 
+  geom_bar(aes(x=smoking,fill=survive),alpha=0.8) +
+  scale_fill_brewer(palette="Set1")+
+  labs(title='title')+ 
+  theme_minimal()
+```
+
+## numeric
+### statistic summaies for some numeric variable 
+*default: all numeric elements*
+```{r}
+# prepare data for statistic summaies
+data_numeric_summary <- data %>% select(age,CPK,EF,platelets,creatinine,sodium,time)
+
+# summary
+apply(X=data_numeric_summary,2,FUN=function(x){summary(x)})
+```
+
+### correlation analysis for some numeric variable 
+*default: all numeric elements*
+```{r}
+# prepare data for correlation analysis
+data_numeric_corr <- data %>% select(age,CPK,EF,platelets,creatinine,sodium,time)
+
+# correlation plot
+ggcorr(data_numeric_corr,label = T, label_size = 3, angle= -30, label_round = 2,size=3)+
+  ggplot2::labs(title = "Correlation Analysis")
+```
+
+### scatter plot for some numeric elements
+*default: all numeric elements*
+
+```{r}
+
+# prepare data for scatter plot
+data_numeric_scatter <- data %>% select(age,CPK,EF,platelets,creatinine,sodium,time,survive)
+data_numeric_scatter$death <- as.factor(1-data_numeric_scatter$survive)
+
+# define color
+pl_colorscale = list(c(0.0, '#119dff'),
+                  c(0.5, '#119dff'),
+                  c(0.5, '#ef553b'),
+                  c(1, '#ef553b'))
+
+# define axis
+axis = list(showline=FALSE,
+            zeroline=FALSE,
+            gridcolor='#ffff',
+            ticklen=4,
+            titlefont=list(size=13))
+
+# points in scatterplot Matrix
+fig <- data_numeric_scatter %>%
+  plot_ly() 
+fig <- fig %>%
+  add_trace(
+    type = 'splom',
+    dimensions = list(
+      list(label='age', values=~age),
+      list(label='CPK', values=~CPK),
+      list(label='EF', values=~EF),
+      list(label='platelets', values=~platelets),
+      list(label='creatinine', values=~creatinine),
+      list(label='sodium', values=~sodium),
+      list(label='time', values=~time)
+    ),
+    text=~factor(death, labels=c("survive","dead")),
+    diagonal=list(visible=F),
+    marker = list(
+      color = ~death,
+      colorscale = pl_colorscale,
+      size = 5,
+      line = list(
+        width = 1,
+        color = 'rgb(230,230,230)'
+      )
+    )
+  ) 
+
+# backgroup of scatterplot Matrix
+fig <- fig %>%
+  layout(
+    title = "Scatterplot Matrix",
+    hovermode='closest',
+    dragmode = 'select',
+    plot_bgcolor='rgba(240,240,240, 0.95)',
+    xaxis=list(domain=NULL, showline=F, zeroline=F, gridcolor='#ffff', ticklen=4, titlefont=list(size=13)),
+    yaxis=list(domain=NULL, showline=F, zeroline=F, gridcolor='#ffff', ticklen=4, titlefont=list(size=13)),
+    xaxis2=axis,
+    xaxis3=axis,
+    xaxis4=axis,
+    xaxis5=axis,
+    xaxis6=axis,
+    xaxis7=axis,
+    yaxis2=axis,
+    yaxis3=axis,
+    yaxis4=axis,
+    yaxis5=axis,
+    yaxis6=axis,
+    yaxis7=axis
+  )%>% style(showupperhalf = F)
+
+# show the figure
+fig
+```
+
+
+### box plot for numeric element
+*default: age*
+```{r}
+# prepare data for boxplot
+data_numeric_box <- factorData %>% select(age,CPK,EF,platelets,creatinine,sodium,time,survive)
+
+# boxplot for age
+ggplot(data = data_numeric_box,aes(x=survive,y=age,color=survive))+
+  geom_violin(trim=FALSE,alpha=0.4)+
+  geom_point(alpha=0.5,position = "jitter")+
+  scale_colour_brewer(palette="Set1")+
+  labs(title="title")+ 
+  theme_minimal()
+
+# boxplot for CPK
+ggplot(data = data_numeric_box,aes(x=survive,y=CPK,color=survive))+
+  geom_violin(trim=FALSE,alpha=0.4)+
+  geom_point(alpha=0.5,position = "jitter")+
+  scale_colour_brewer(palette="Set1")
+
+# boxplot for EF
+ggplot(data = data_numeric_box,aes(x=survive,y=EF,color=survive))+
+  geom_violin(trim=FALSE,alpha=0.4)+
+  geom_point(alpha=0.5,position = "jitter")+
+  scale_colour_brewer(palette="Set1")
+
+# boxplot for platelets
+ggplot(data = data_numeric_box,aes(x=survive,y=platelets,color=survive))+
+  geom_violin(trim=FALSE,alpha=0.4)+
+  geom_point(alpha=0.5,position = "jitter")+
+  scale_colour_brewer(palette="Set1")
+
+# boxplot for creatinine
+ggplot(data = data_numeric_box,aes(x=survive,y=creatinine,color=survive))+
+  geom_violin(trim=FALSE,alpha=0.4)+
+  geom_point(alpha=0.5,position = "jitter")+
+  scale_colour_brewer(palette="Set1")
+
+# boxplot for sodium
+ggplot(data = data_numeric_box,aes(x=survive,y=sodium,color=survive))+
+  geom_violin(trim=FALSE,alpha=0.4)+
+  geom_point(alpha=0.5,position = "jitter")+
+  scale_colour_brewer(palette="Set1")
+
+# boxplot for time
+ggplot(data = data_numeric_box,aes(x=survive,y=time,color=survive))+
+  geom_violin(trim=FALSE,alpha=0.4)+
+  geom_point(alpha=0.5,position = "jitter")+
+  scale_colour_brewer(palette="Set1")
+
+```
+
+# 3. PCA
+
+## Introduction
+
+Principal components analysis (PCA) is a dimension reduction technique that is widely used in multivariate statistics. The objective is to condense the information that is present in the original set of variables via linear combinations of the variables while losing as little information as possible. 
+
+Typically, the number of linear transformations is much smaller than the number of original variables; hence the reduction in the dimensionality of the data. This can be useful in different ways, such as providing better visualization and computational advantages. PCA also decorrelates the data, that is, PCA produces linear combinations of the variables that are mutually uncorrelated.
+
+Goal: Obtain a linear combination of the variables that accounts for the largest amount of variability (assume 0 mean for each predictor).
+
+$$ z_{i1} = \phi_{11}x_{i1}+ \phi_{21}x_{i2}+...+ \phi_{p1}x_{ip}$$
+Constraint: 
+
+- $\Sigma^p_{j=1}\phi^2_{j1}=1$.
+
+- $\mathop{max}\limits_{\phi's}\frac{1}{n}\Sigma^n_{i=1}z^2_{i1}$.
+
+- PCs must be mutually exclusive.
+
+## analysis
+```{r}
+# prepare data for pca
+data_numeric_pc  <- data %>% select(age,CPK,EF,platelets,creatinine,sodium,time)
 
 # PCA
-```{r}
-std.data <- scale(select(pottery,Al2O3:BaO))
-pc.out <- prcomp(std.data)
-summary(pc.out)
-plot(pc.out,type="l")
+pc.out <- prcomp(data_numeric_pc,scale = T)
+
+# referrence
+test <- summary(pc.out)
+data.frame(test$importance)
+screeplot(pc.out,type="lines",col="#990000",lwd=2)
+
+# rotation
+data.frame(round(pc.out$rotation[,1:3],3))
+
+# 3dplot of pc
+pca3d(pc.out,components = c(1,2,3),group=data$survive, legend="right")
+
+# save the screenshot of 3dplot 
+## snapshotPCA3d(file="second_plot.png")
+
+# biplot
+pca2d(pc.out,components = c(1,2),group=data$survive,biplot = T, biplot.vars = 7, legend="right")
 ```
 
-# Modelling
-```{r}
+# 4. Modelling
 
+## Tree model 
+
+### Introduction
+Classification tree if goal is to classify (predict) group membership.
+
+For a binary response, within a given node (p=P(correct classification))
+
+$$ Deviance: -2plog(p)-2(1-p)log(1-p)$$
+
+For all possible splits, minimize this (weighted appropriately for node size).
+
+We need to pruned back using classification error rate to prevent overfit, which might increase bias but decrease variance, hopefully improving prediction.
+
+### Analysis
+```{r}
+# prepare data for tree model
+data_factor_tree <- factorData %>% select(time, creatinine,survive)
+
+# fit the tree model
+treeFit <- tree(survive ~ . ,data=data_factor_tree,split="deviance")
+
+# result of tree model
+summary(treeFit)
+
+# tree model plot
+plot(treeFit,col="grey")
+text(treeFit, pretty = 0, cex = 1)
+
+# referrence result for choosing tree size
+pruneFit <- cv.tree(treeFit, FUN = prune.misclass)
+pruneFit
+data.frame(size=pruneFit$size,deviance=pruneFit$dev)
+
+# referrence plot for choosing tree size
+plot(pruneFit$size,pruneFit$dev,type="b",col="#990000",lwd=2,main="title",xlab="size",ylab="deviance")
+
+# prune for better prediction
+pruneFitFinal <- prune.misclass(treeFit,best=2) # choose the tree size in best option
+
+# tree model plot after pruning
+plot(pruneFitFinal,col="grey")
+text(pruneFitFinal, pretty = 0, cex = 1)
+
+# user predict to change the variable value (need to split the categorical data and numeric data)
+predClass <- predict(pruneFitFinal, newdata = data.frame(time=10, creatinine=2),type="class")
+
+# prediction results
+if (predClass == 1){
+  print("survive = 1")
+} else {
+  print("survive = 0")
+}
 ```
 
-# Conclusion
-```{r}
+## Logistic Regression
+*default variable: time + creatinine*
 
+### Introduction
+
+Logistic regression is a statistical model that in its basic form uses a logistic function to model a binary dependent variable. 
+
+Basic Logistic Regression models survive probability using logistic function, where $\boldsymbol{\beta} = (\beta_1,...\beta_p)^T,\boldsymbol{x}=(x_1,...x_p)^T$
+
+$$P(survive=1|\boldsymbol{x})=\frac{e^{\alpha+\boldsymbol{\beta}^T\boldsymbol{x}}}{1+e^{\alpha+\boldsymbol{\beta}^T\boldsymbol{x}}}$$
+
+$$log\left[\frac{P(survive=1|\boldsymbol{x})}{P(survive=0|\boldsymbol{x})}\right]=\alpha+\boldsymbol{\beta}^T\boldsymbol{x}$$
+
+### Analysis
+
+```{r}
+# prepare data for logistic regression
+data_factor_log <- factorData %>% select(time, creatinine,survive)
+
+# logistic regression
+glmFit <- glm(survive ~ ., data=data_factor_log,family = "binomial")
+
+# result of logistic regression
+summary(glmFit)
+
+# predict
+predFrac<- exp(predict(glmFit, newdata = data.frame(time=10, creatinine=2),type="link"))
+
+# prediction results
+if (predFrac > 1){
+  print("survive = 1")
+} else {
+  print("survive = 0")
+}
+```
+
+# 5. Data
+```{r}
+# data table to look up data
+datatable(data)
 ```
 
