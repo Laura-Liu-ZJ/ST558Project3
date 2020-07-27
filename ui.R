@@ -23,6 +23,10 @@ library(tree)
 #              Shiny UI            #
 ####################################
 
+# ready for rgl plot
+options(rgl.useNULL = TRUE)
+
+
 dashboardPage(skin = "red",
               dashboardHeader(title = "Heart Failure Clinical Records"),
               dashboardSidebar(uiOutput("ui_sidebar")),
@@ -31,6 +35,5 @@ dashboardPage(skin = "red",
                       theme = "flat_red"
                   ),
                   uiOutput("ui_body")
-              ),
-              withMathJax()
+              )
 )

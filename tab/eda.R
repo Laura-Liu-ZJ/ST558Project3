@@ -43,17 +43,11 @@ tabItem_eda <-
                      sidebarPanel(h4("Select Variables:"),
                                   
                                   checkboxGroupInput("eda_n_var",
-                                                     "For Summaries and Correlation Analysis:",
+                                                     "",
                                                      choiceNames = n_list,
                                                      choiceValues = n_list,
                                                      selected = n_list
-                                  ),
-                                  br(),
-                                  selectInput("eda_n_bvar",
-                                              "For Box Plot:",
-                                              choices = n_list,
-                                              selected = n_list[1]
-                                              )
+                                  )
                      ),
                      
                      mainPanel(
@@ -70,10 +64,16 @@ tabItem_eda <-
                               ),
                        br(),
                        
-                       h4("Scatter Plot for Selected Variables"), # Scatter
+                       h4("Scatter Plot for All Variables"), # Scatter
                        plotlyOutput("eda_n_sc"),  # Scatter
                        br(),
                        
+                       hr(),
+                       selectInput("eda_n_bvar",
+                                   "Select Variable:",
+                                   choices = n_list,
+                                   selected = n_list[1]
+                       ),
                        h4(textOutput("eda_n_box_title")), # Box
                        plotOutput("eda_n_box"),  # Box
                        column(12,

@@ -53,10 +53,10 @@ shinyServer(function(input, output, session, options = options(warn = -1)) {
                    br(),
                    h5(paste("Author:", author), 
                       style = "color:gray;"
-                      ),
+                   ),
                    h5(tagList("E-mail:", a(email, href = paste0("mailto:", email))),
                       style = "color:gray;"
-                      )
+                   )
             )
         )
     })

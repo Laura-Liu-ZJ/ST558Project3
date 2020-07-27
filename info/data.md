@@ -1,9 +1,9 @@
-#### Dataset
+### Dataset
 
 The original dataset version was collected by Tanvir Ahmad, Assia Munir, Sajjad Haider Bhatti, Muhammad Aftab, and Muhammad Ali Raza (Government College University, Faisalabad, Pakistan) and made available by them on FigShare under the Attribution 4.0 International (CC BY 4.0: freedom to share and adapt the material) copyright in July 2017.
 
 
-#### Thirteen (13) clinical features:
+### Thirteen (13) clinical features:
 
 - Age: age of the patient (*years*)
 - Anaemia: decrease of red blood cells or hemoglobin (*boolean*)
@@ -20,3 +20,6 @@ The original dataset version was collected by Tanvir Ahmad, Assia Munir, Sajjad 
 - **[target]** Death Event: if the patient deceased during the follow-up period (*boolean*)
 
 [Attribute Information](http://archive.ics.uci.edu/ml/datasets/Heart+failure+clinical+records)
+
+
+![Heart](https://i0.wp.com/cdn-prod.medicalnewstoday.com/content/images/articles/323/323302/heart-concept-illustration.jpg?w=600&h=800)
