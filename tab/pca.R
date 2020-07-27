@@ -118,7 +118,7 @@ tabItem_pca <-
                                        align = "right",
                                        downloadButton("pca_save_2d",
                                                       "Save Plot")
-                                       ),
+                                ),
                                 hr()
                                 
                               ) # End of mainpanel
@@ -158,6 +158,7 @@ output$pca_sum <-
   renderPrint({
     output <- pca()
     summary(output)
+    
   })
 
 
@@ -171,6 +172,7 @@ output$pca_plt_sc <-
   renderPlot({
     output <- pca()
     screeplot(output,type="lines",col="#990000",lwd=2)
+    
   })
 
 output$pca_save_var <-
@@ -203,7 +205,9 @@ plt_3d <- reactive({
 output$pca_plt_3d <- 
   renderRglwidget({
     if (req(input$pca_submit_1)>0) { 
-      isolate(plt_3d())
+      withProgress(message = 'Generating 3D Plot', value = 1, {
+        isolate(plt_3d())
+      })
     }
   })
 
