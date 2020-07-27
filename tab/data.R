@@ -1,3 +1,9 @@
+####################################################
+# Purpose: data page                               #
+# Author: Zhijun Liu                               #
+# Date: 2020-07-24                                 #
+####################################################
+
 tabItem_data <- 
   tabItem(tabName = "data",
           fluidRow(
