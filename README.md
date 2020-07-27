@@ -1,6 +1,6 @@
 # ST558Project3
 
-## Files
+### Files
 If you want to run this app locally, you have to download `ui.R` and `server.R` files as well as `info` and `tab` folders.
 The dataset is `heart_failure_clinical_records_dataset.csv`, you can also get it from this [link](http://archive.ics.uci.edu/ml/datasets/Heart+failure+clinical+records).
 
@@ -8,8 +8,8 @@ The original static file is `project3_static.Rmd`. I transformed this static fil
 
 If you want to look at and try this app, you can click this [link](https://zhijun-liu.shinyapps.io/st558project3/).
 
-## Packages
+### Packages
 
 This app needs `shiny`, `shinydashboard`, `dashboardthemes`, `DT`, `ggplot2`, `GGally`, `tidyverse`, `shinythemes`, `plotly`, `rgl`, `pca3d` and `tree` packages. If you haven't installed these packages before, you have to install these packages first.
 
-Thank you!
+### Thank you!
