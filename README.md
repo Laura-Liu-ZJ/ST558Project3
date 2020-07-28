@@ -4,8 +4,6 @@
 If you want to run this app in your Rstudio, you need to copy and run the following code in your R console.
 
 ```
-library(shiny)
-
 # Use runGitHub to get repo
 runGitHub("ST558Project3", "rstudio")
 
