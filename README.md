@@ -1,7 +1,18 @@
 # ST558Project3
 
 ### Files
-If you want to run this app locally, you have to download `ui.R` and `server.R` files as well as `info` and `tab` folders.
+If you want to run this app in your Rstudio you need to copy and the following code in your R console.
+
+```
+library(shiny)
+
+# Use runGitHub to get repo
+runGitHub("ST558Project3", "rstudio")
+
+# Run a tar file directly
+runUrl("https://github.com/Laura-Liu-ZJ/ST558Project3/archive/master.tar.gz")
+```
+
 The dataset is `heart_failure_clinical_records_dataset.csv`, you can also get it from this [link](http://archive.ics.uci.edu/ml/datasets/Heart+failure+clinical+records).
 
 The original static file is `project3_static.Rmd`. I transformed this static file into an interactive application by building the app frame by `ui.R` as well as`server.R` and filling it by `info` and `tab` folders. The `info` folder includes all the introductions with `.md` files and the `tab` folder includes all the codes for each page with `.R` files.
